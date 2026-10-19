@@ -106,5 +106,10 @@ int32_t MockBatterySrvProxy::IsBatteryConfigSupported(const std::string& feature
 {
     return ERR_FAIL;
 }
+
+int32_t MockBatterySrvProxy::HandleNotification(const std::string& ueventName, int32_t& batteryErr)
+{
+    return ERR_FAIL;
+}
 } // namespace PowerMgr
 } // namespace OHOS

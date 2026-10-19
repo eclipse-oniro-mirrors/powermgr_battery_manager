@@ -99,6 +99,12 @@ public:
      * is support charge config
      */
     BatteryError IsBatteryConfigSupported(const std::string& sceneName, bool& result);
+    /**
+     * Handle notification by uevent name
+     * @param ueventName the name of uevent
+     * @return returns {@link BatteryError::ERR_OK} if successful, {@link BatteryError} otherwise
+     */
+    BatteryError HandleNotification(const std::string& ueventName);
 
 #ifndef BATTERYMGR_DEATHRECIPIENT_UNITTEST
 private:

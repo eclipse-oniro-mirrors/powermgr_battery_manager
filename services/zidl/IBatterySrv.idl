@@ -32,4 +32,5 @@ interface OHOS.PowerMgr.IBatterySrv {
     void SetBatteryConfig([in] String sceneName, [in] String value, [out] int batteryErr);
     void GetBatteryConfig([in] String sceneName, [out] String getResult, [out] int batteryErr);
     void IsBatteryConfigSupported([in] String featureName, [out] boolean isResult, [out] int batteryErr);
+    void HandleNotification([in] String ueventName, [out] int batteryErr);
 }

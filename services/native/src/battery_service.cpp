@@ -780,6 +780,32 @@ BatteryError BatteryService::IsBatteryConfigSupportedInner(const std::string& sc
     return BatteryError::ERR_OK;
 }
 
+BatteryError BatteryService::HandleNotificationInner(const std::string& ueventName)
+{
+    if (!Permission::IsSystem()) {
+        BATTERY_HILOGI(FEATURE_BATT_INFO, "HandleNotification failed, permission denied");
+        return BatteryError::ERR_SYSTEM_API_DENIED;
+    }
+
+    if (!Permission::IsPermissionGranted("ohos.permission.POWER_MANAGER")) {
+        BATTERY_HILOGI(FEATURE_BATT_INFO, "HandleNotificationInner does not have the permission");
+        return BatteryError::ERR_PERMISSION_DENIED;
+    }
+
+    BATTERY_HILOGI(FEATURE_BATT_INFO, "Enter HandleNotification, ueventName: %{public}s", ueventName.c_str());
+    if (batteryNotify_ == nullptr) {
+        BATTERY_HILOGE(FEATURE_BATT_INFO, "batteryNotify_ is nullptr");
+        return BatteryError::ERR_HANDLE_NOTIFICATION_FAIL;
+    }
+
+    bool ret = batteryNotify_->HandleNotification(ueventName);
+    if (!ret) {
+        BATTERY_HILOGE(FEATURE_BATT_INFO, "HandleNotification failed, ueventName: %{public}s", ueventName.c_str());
+        return BatteryError::ERR_HANDLE_NOTIFICATION_FAIL;
+    }
+    return BatteryError::ERR_OK;
+}
+
 BatteryChargeState BatteryService::GetChargingStatusInner()
 {
     if (isMockUnplugged_) {
@@ -1271,6 +1297,13 @@ int32_t BatteryService::IsBatteryConfigSupported(const std::string& featureName,
 {
     BatteryXCollie batteryXCollie("BatteryService::IsBatteryConfigSupported");
     batteryErr = static_cast<int32_t>(IsBatteryConfigSupportedInner(featureName, result));
+    return ERR_OK;
+}
+
+int32_t BatteryService::HandleNotification(const std::string& ueventName, int32_t& batteryErr)
+{
+    BatteryXCollie batteryXCollie("BatteryService::HandleNotification");
+    batteryErr = static_cast<int32_t>(HandleNotificationInner(ueventName));
     return ERR_OK;
 }
 } // namespace PowerMgr
