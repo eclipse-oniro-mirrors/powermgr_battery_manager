@@ -90,6 +90,7 @@ private:
     BatteryError SetBatteryConfigInner(const std::string& sceneName, const std::string& value);
     BatteryError GetBatteryConfigInner(const std::string& sceneName, std::string& result);
     BatteryError IsBatteryConfigSupportedInner(const std::string& sceneName, bool& result);
+    BatteryError HandleNotificationInner(const std::string& ueventName);
 public:
     int32_t GetCapacity(int32_t& capacity) override;
     int32_t GetChargingStatus(uint32_t& chargeState) override;
@@ -108,6 +109,7 @@ public:
     int32_t SetBatteryConfig(const std::string& sceneName, const std::string& value, int32_t& batteryErr) override;
     int32_t GetBatteryConfig(const std::string& sceneName, std::string& result, int32_t& batteryErr) override;
     int32_t IsBatteryConfigSupported(const std::string& featureName, bool& result, int32_t& batteryErr) override;
+    int32_t HandleNotification(const std::string& ueventName, int32_t& batteryErr) override;
 
     void InitConfig();
     void HandleTemperature(int32_t temperature);

@@ -24,7 +24,8 @@ enum class BatteryError : int32_t {
     ERR_PERMISSION_DENIED = 201,
     ERR_SYSTEM_API_DENIED = 202,
     ERR_PARAM_INVALID = 401,
-    ERR_CONNECTION_FAIL = 5100101
+    ERR_CONNECTION_FAIL = 5100101,
+    ERR_HANDLE_NOTIFICATION_FAIL = 5100102
 };
 } // namespace PowerMgr
 } // namespace OHOS

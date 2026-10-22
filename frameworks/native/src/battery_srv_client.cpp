@@ -293,5 +293,18 @@ BatteryError BatterySrvClient::IsBatteryConfigSupported(const std::string& scene
     }
     return static_cast<BatteryError>(batteryErr);
 }
+
+BatteryError BatterySrvClient::HandleNotification(const std::string& ueventName)
+{
+    auto proxy = Connect();
+    RETURN_IF_WITH_RET(proxy == nullptr, BatteryError::ERR_CONNECTION_FAIL);
+    int32_t batteryErr = static_cast<int32_t>(BatteryError::ERR_CONNECTION_FAIL);
+    auto ret = proxy->HandleNotification(ueventName, batteryErr);
+    if (ret != ERR_OK) {
+        BATTERY_HILOGE(COMP_FWK, "HandleNotification ret = %{public}d", ret);
+        return BatteryError::ERR_CONNECTION_FAIL;
+    }
+    return static_cast<BatteryError>(batteryErr);
+}
 }  // namespace PowerMgr
 }  // namespace OHOS

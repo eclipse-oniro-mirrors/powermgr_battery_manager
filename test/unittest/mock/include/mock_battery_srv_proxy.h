@@ -43,6 +43,7 @@ public:
     int32_t SetBatteryConfig(const std::string& sceneName, const std::string& value, int32_t& batteryErr) override;
     int32_t GetBatteryConfig(const std::string& sceneName, std::string& getResult, int32_t& batteryErr) override;
     int32_t IsBatteryConfigSupported(const std::string& featureName, bool& isResult, int32_t& batteryErr) override;
+    int32_t HandleNotification(const std::string& ueventName, int32_t& batteryErr) override;
 };
 } // namespace PowerMgr
 } // namespace OHOS

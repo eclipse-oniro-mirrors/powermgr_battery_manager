@@ -32,6 +32,7 @@
             OHOS::PowerMgr::BatterySrvClient::GetChargingStatus*;
             OHOS::PowerMgr::BatterySrvClient::GetBatteryTemperature*;
             OHOS::PowerMgr::BatterySrvClient::GetRemainingChargeTime*;
+            OHOS::PowerMgr::BatterySrvClient::HandleNotification*;
             OHOS::PowerMgr::BatterySrvClient::IsBatteryConfigSupported*;
             OHOS::PowerMgr::BatterySrvClient::Connect*;
             OHOS::PowerMgr::BatterySrvClient::BatterySrvClient*;
@@ -54,6 +55,7 @@
             OHOS::PowerMgr::BatterySrvProxy::GetBatteryTemperature*;
             OHOS::PowerMgr::BatterySrvProxy::GetRemainingChargeTime*;
             OHOS::PowerMgr::BatterySrvProxy::IsBatteryConfigSupported*;
+            OHOS::PowerMgr::BatterySrvProxy::HandleNotification*;
             vtable?for?OHOS::PowerMgr::BatterySrvProxy;
             vtable?for?OHOS::PowerMgr::BatterySrvClient*;
             VTT?for?OHOS::PowerMgr::BatterySrvProxy;
