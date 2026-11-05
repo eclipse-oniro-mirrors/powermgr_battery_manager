@@ -939,12 +939,33 @@ HWTEST_F(BatteryNotifyTest, BatteryNotify044, TestSize.Level1)
 {
     BATTERY_HILOGI(LABEL_TEST, "BatteryNotify044 function start!");
     auto& notificationLocale = NotificationLocale::GetInstance();
-    
+
     std::string longText(1000, 'Z');
     auto ret = notificationLocale.FillTextWithPower(longText);
     EXPECT_EQ(ret, longText);
-    
+
     BATTERY_HILOGI(LABEL_TEST, "BatteryNotify044 function end!");
+}
+
+/**
+ * @tc.name: BatteryNotify045
+ * @tc.desc: Test HandleNotification with valid popup conf
+ * @tc.type: FUNC
+ */
+HWTEST_F(BatteryNotifyTest, BatteryNotify045, TestSize.Level1)
+{
+    BATTERY_HILOGI(LABEL_TEST, "BatteryNotify045 function start!");
+    const std::string ueventName = "BatteryNotify045_test_uevent";
+    auto& batteryConfig = BatteryConfig::GetInstance();
+    BatteryConfig::PopupConf popupConf = { "BatteryNotify045_test_popup", 0 };
+    batteryConfig.popupConfig_[ueventName] = { popupConf };
+    bool ret = g_batteryNotify->HandleNotification(ueventName);
+    BATTERY_HILOGI(LABEL_TEST, "HandleNotification ret[%d]", static_cast<int32_t>(ret));
+    batteryConfig.popupConfig_.erase(ueventName);
+#ifndef BATTERY_SUPPORT_NOTIFICATION
+    EXPECT_TRUE(ret);
+#endif
+    BATTERY_HILOGI(LABEL_TEST, "BatteryNotify045 function end!");
 }
 } // namespace PowerMgr
 } // namespace OHOS

@@ -24,12 +24,14 @@
 #include <memory>
 #include <string>
 
+#include "battery_config.h"
 #include "battery_info.h"
 #include "battery_log.h"
 #include "battery_service.h"
 #include "common_event_data.h"
 #include "common_event_subscriber.h"
 #include "common_event_support.h"
+#include "permission.h"
 #include "securec.h"
 #include "test_utils.h"
 #include "battery_xcollie.h"
@@ -44,6 +46,9 @@ using namespace std;
 namespace {
 sptr<BatteryService> g_service;
 bool g_isMock = TestUtils::IsMock();
+// Permission switches: link-time symbol override for Permission::IsSystem/IsPermissionGranted.
+bool g_isSystem = true;
+bool g_isPermissionGranted = true;
 const std::string MOCK_BATTERY_PATH = "/data/service/el0/battery/";
 constexpr int DELAY_TIME_US = 200000;
 constexpr int TEST_CAPACITY_MIN = 0;
@@ -51,6 +56,17 @@ constexpr int TEST_CAPACITY_MAX = 100;
 constexpr int TEST_CAPACITY_FIRST = 50;
 constexpr int TEST_CAPACITY_SECOND = 60;
 }
+
+namespace OHOS::PowerMgr {
+bool Permission::IsSystem()
+{
+    return g_isSystem;
+}
+bool Permission::IsPermissionGranted(const std::string& perm)
+{
+    return g_isPermissionGranted;
+}
+} // namespace OHOS::PowerMgr
 
 void BatteryServiceTest::TearDownTestCase(void)
 {
@@ -878,6 +894,114 @@ static HWTEST_F(BatteryServiceTest, BatteryService041, TestSize.Level1)
     g_service->GetBatteryConfig(sceneName, result, batteryErr);
     EXPECT_EQ(batteryErr, static_cast<int32_t>(BatteryError::ERR_FAILURE));
     BATTERY_HILOGI(LABEL_TEST, "BatteryService041 function end!");
+}
+
+/**
+ * @tc.name: BatteryService042
+ * @tc.desc: Test functions HandleNotification with unknown uevent name
+ * @tc.type: FUNC
+ */
+static HWTEST_F(BatteryServiceTest, BatteryService042, TestSize.Level1)
+{
+    BATTERY_HILOGI(LABEL_TEST, "BatteryService042 function start!");
+    string ueventName = "BatteryService042_test_uevent";
+    int32_t batteryErr = static_cast<int32_t>(BatteryError::ERR_FAILURE);
+    int32_t ret = g_service->HandleNotification(ueventName, batteryErr);
+    EXPECT_EQ(ret, 0);
+#ifdef BATTERY_SUPPORT_NOTIFICATION
+    EXPECT_EQ(batteryErr, static_cast<int32_t>(BatteryError::ERR_HANDLE_NOTIFICATION_FAIL));
+#else
+    EXPECT_EQ(batteryErr, static_cast<int32_t>(BatteryError::ERR_OK));
+#endif
+    BATTERY_HILOGI(LABEL_TEST, "BatteryService042 function end!");
+}
+
+/**
+ * @tc.name: BatteryService043
+ * @tc.desc: Test functions HandleNotification when batteryNotify_ is nullptr
+ * @tc.type: FUNC
+ */
+static HWTEST_F(BatteryServiceTest, BatteryService043, TestSize.Level1)
+{
+    BATTERY_HILOGI(LABEL_TEST, "BatteryService043 function start!");
+    BatteryNotify* notify = g_service->batteryNotify_.release();
+    g_service->batteryNotify_ = nullptr;
+    string ueventName = "BatteryService043_test_uevent";
+    int32_t batteryErr = static_cast<int32_t>(BatteryError::ERR_OK);
+    int32_t ret = g_service->HandleNotification(ueventName, batteryErr);
+    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(batteryErr, static_cast<int32_t>(BatteryError::ERR_HANDLE_NOTIFICATION_FAIL));
+    g_service->batteryNotify_.reset(notify);
+    BATTERY_HILOGI(LABEL_TEST, "BatteryService043 function end!");
+}
+
+/**
+ * @tc.name: BatteryService044
+ * @tc.desc: Test BatteryError enum value of ERR_HANDLE_NOTIFICATION_FAIL
+ * @tc.type: FUNC
+ */
+static HWTEST_F(BatteryServiceTest, BatteryService044, TestSize.Level1)
+{
+    BATTERY_HILOGI(LABEL_TEST, "BatteryService044 function start!");
+    EXPECT_EQ(static_cast<int32_t>(BatteryError::ERR_HANDLE_NOTIFICATION_FAIL), 5100102);
+    BATTERY_HILOGI(LABEL_TEST, "BatteryService044 function end!");
+}
+
+/**
+ * @tc.name: BatteryService045
+ * @tc.desc: Test functions HandleNotification with valid uevent conf
+ * @tc.type: FUNC
+ */
+static HWTEST_F(BatteryServiceTest, BatteryService045, TestSize.Level1)
+{
+    BATTERY_HILOGI(LABEL_TEST, "BatteryService045 function start!");
+    string ueventName = "BatteryService045_test_uevent";
+    auto& batteryConfig = BatteryConfig::GetInstance();
+    batteryConfig.popupConfig_[ueventName] = { {"BatteryService045_test_popup", 0} };
+    int32_t batteryErr = static_cast<int32_t>(BatteryError::ERR_FAILURE);
+    int32_t ret = g_service->HandleNotification(ueventName, batteryErr);
+    batteryConfig.popupConfig_.erase(ueventName);
+    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(batteryErr, static_cast<int32_t>(BatteryError::ERR_OK));
+    BATTERY_HILOGI(LABEL_TEST, "BatteryService045 function end!");
+}
+
+/**
+ * @tc.name: BatteryService046
+ * @tc.desc: Test functions HandleNotification when caller is not a system app
+ * @tc.type: FUNC
+ */
+static HWTEST_F(BatteryServiceTest, BatteryService046, TestSize.Level1)
+{
+    BATTERY_HILOGI(LABEL_TEST, "BatteryService046 function start!");
+    string ueventName = "BatteryService046_test_uevent";
+    int32_t batteryErr = static_cast<int32_t>(BatteryError::ERR_OK);
+    g_isSystem = false;
+    g_isPermissionGranted = true;
+    int32_t ret = g_service->HandleNotification(ueventName, batteryErr);
+    g_isSystem = true;
+    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(batteryErr, static_cast<int32_t>(BatteryError::ERR_SYSTEM_API_DENIED));
+    BATTERY_HILOGI(LABEL_TEST, "BatteryService046 function end!");
+}
+
+/**
+ * @tc.name: BatteryService047
+ * @tc.desc: Test functions HandleNotification when caller has no POWER_MANAGER permission
+ * @tc.type: FUNC
+ */
+static HWTEST_F(BatteryServiceTest, BatteryService047, TestSize.Level1)
+{
+    BATTERY_HILOGI(LABEL_TEST, "BatteryService047 function start!");
+    string ueventName = "BatteryService047_test_uevent";
+    int32_t batteryErr = static_cast<int32_t>(BatteryError::ERR_OK);
+    g_isSystem = true;
+    g_isPermissionGranted = false;
+    int32_t ret = g_service->HandleNotification(ueventName, batteryErr);
+    g_isPermissionGranted = true;
+    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(batteryErr, static_cast<int32_t>(BatteryError::ERR_PERMISSION_DENIED));
+    BATTERY_HILOGI(LABEL_TEST, "BatteryService047 function end!");
 }
 
 /**

@@ -1086,4 +1086,62 @@ HWTEST_F(BatteryClientTest, BatteryClient039, TestSize.Level0)
     EXPECT_NE(batteryErr, BatteryError::ERR_OK);
     BATTERY_HILOGI(LABEL_TEST, "BatteryClient039 function end!");
 }
+
+/**
+ * @tc.name: BatteryClient040
+ * @tc.desc: test HandleNotification() when proxy return fail
+ * @tc.type: FUNC
+ * @tc.require
+ */
+HWTEST_F(BatteryClientTest, BatteryClient040, TestSize.Level0)
+{
+    BATTERY_HILOGI(LABEL_TEST, "BatteryClient040 function start!");
+    auto& BatterySrvClient = BatterySrvClient::GetInstance();
+    auto proxy = BatterySrvClient.proxy_;
+    BatterySrvClient.proxy_ = g_mockProxy;
+    std::string ueventName = "BatteryClient040_test_uevent";
+    auto batteryErr = BatterySrvClient.HandleNotification(ueventName);
+    BatterySrvClient.proxy_ = proxy;
+    EXPECT_EQ(batteryErr, BatteryError::ERR_CONNECTION_FAIL);
+    BATTERY_HILOGI(LABEL_TEST, "BatteryClient040 function end!");
+}
+
+/**
+ * @tc.name: BatteryClient041
+ * @tc.desc: Test IBatterySrv interface HandleNotification
+ * @tc.type: FUNC
+ * @tc.require
+ */
+HWTEST_F(BatteryClientTest, BatteryClient041, TestSize.Level1)
+{
+    BATTERY_HILOGI(LABEL_TEST, "BatteryClient041 function start!");
+    auto& BatterySrvClient = BatterySrvClient::GetInstance();
+    std::string ueventName = "BatteryClient041_test_uevent";
+    BatteryError ret = BatterySrvClient.HandleNotification(ueventName);
+    BATTERY_HILOGI(LABEL_TEST, "BatteryClient041::ret=%{public}d", static_cast<int32_t>(ret));
+    EXPECT_TRUE(ret == BatteryError::ERR_OK || ret == BatteryError::ERR_CONNECTION_FAIL ||
+        ret == BatteryError::ERR_HANDLE_NOTIFICATION_FAIL);
+    BATTERY_HILOGI(LABEL_TEST, "BatteryClient041 function end!");
+}
+
+/**
+ * @tc.name: BatteryClient042
+ * @tc.desc: test HandleNotification() when proxy return success
+ * @tc.type: FUNC
+ * @tc.require
+ */
+HWTEST_F(BatteryClientTest, BatteryClient042, TestSize.Level0)
+{
+    BATTERY_HILOGI(LABEL_TEST, "BatteryClient042 function start!");
+    auto& BatterySrvClient = BatterySrvClient::GetInstance();
+    auto proxy = BatterySrvClient.proxy_;
+    BatterySrvClient.proxy_ = g_mockProxy;
+    MockBatterySrvProxy::isHandleNotificationSuccess_ = true;
+    std::string ueventName = "BatteryClient042_test_uevent";
+    auto batteryErr = BatterySrvClient.HandleNotification(ueventName);
+    MockBatterySrvProxy::isHandleNotificationSuccess_ = false;
+    BatterySrvClient.proxy_ = proxy;
+    EXPECT_EQ(batteryErr, BatteryError::ERR_HANDLE_NOTIFICATION_FAIL);
+    BATTERY_HILOGI(LABEL_TEST, "BatteryClient042 function end!");
+}
 } // namespace
