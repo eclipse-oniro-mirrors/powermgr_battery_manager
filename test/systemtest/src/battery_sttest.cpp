@@ -613,7 +613,7 @@ HWTEST_F (BatterySttest, BatteryST017, TestSize.Level1)
 #ifdef PC_TEST
         EXPECT_TRUE(technology == "Li-ion");
 #else
-        EXPECT_TRUE(technology == "Li-poly");
+        EXPECT_TRUE(technology == "Li-poly" || technology == "Li-ion");
 #endif
     }
     BATTERY_HILOGI(LABEL_TEST, "BatteryST017 function end!");

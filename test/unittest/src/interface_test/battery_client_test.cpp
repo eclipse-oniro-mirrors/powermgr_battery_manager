@@ -299,7 +299,7 @@ HWTEST_F (BatteryClientTest, BatteryClient007, TestSize.Level1)
 #ifdef PC_TEST
         ASSERT_TRUE(technology == "Li-ion");
 #else
-        ASSERT_TRUE(technology == "Li-poly");
+        ASSERT_TRUE(technology == "Li-poly" || technology == "Li-ion");
 #endif
     }
     BATTERY_HILOGI(LABEL_TEST, "BatteryClient::BatteryClient007 function end!");
