@@ -14,6 +14,8 @@
  */
 
 #include "mock_battery_srv_proxy.h"
+#include "battery_srv_errors.h"
+
 namespace {
 constexpr int32_t ERR_FAIL = -1;
 }
@@ -107,9 +109,15 @@ int32_t MockBatterySrvProxy::IsBatteryConfigSupported(const std::string& feature
     return ERR_FAIL;
 }
 
+bool MockBatterySrvProxy::isHandleNotificationSuccess_ = false;
+
 int32_t MockBatterySrvProxy::HandleNotification(const std::string& ueventName, int32_t& batteryErr)
 {
-    return ERR_FAIL;
+    if (!isHandleNotificationSuccess_) {
+        return ERR_FAIL;
+    }
+    batteryErr = static_cast<int32_t>(BatteryError::ERR_HANDLE_NOTIFICATION_FAIL);
+    return static_cast<int32_t>(BatteryError::ERR_OK);
 }
 } // namespace PowerMgr
 } // namespace OHOS
