@@ -101,6 +101,7 @@ bool NotificationLocale::SaveJsonToMap(const std::string& fileStr, const std::st
 
 void NotificationLocale::ParseLocaleCfg()
 {
+    std::unique_lock<std::shared_mutex> lock(dataMutex_);
     if (islanguageMapInit_) {
         return;
     }
@@ -112,6 +113,7 @@ void NotificationLocale::ParseLocaleCfg()
 
 void NotificationLocale::UpdateStringMap()
 {
+    std::unique_lock<std::shared_mutex> lock(dataMutex_);
     OHOS::Global::I18n::LocaleInfo locale(Global::I18n::LocaleConfig::GetSystemLocale());
     std::string curBaseName = locale.GetBaseName();
     if (localeBaseName_ == curBaseName) {
@@ -141,14 +143,19 @@ void NotificationLocale::UpdateStringMap()
 
 std::string NotificationLocale::GetStringByKey(const std::string& key)
 {
-    auto iter = stringMap_.find(key);
-    if (iter != stringMap_.end()) {
-        if (key == REVERSE_CHARGE_WITH_POWER_DISPLAY_TEXT_KEY) {
-            return FillTextWithPower(iter->second);
+    std::string result;
+    {
+        std::shared_lock<std::shared_mutex> lock(dataMutex_);
+        auto iter = stringMap_.find(key);
+        if (iter == stringMap_.end()) {
+            return "";
         }
-        return iter->second;
+        result = iter->second;
     }
-    return "";
+    if (key == REVERSE_CHARGE_WITH_POWER_DISPLAY_TEXT_KEY) {
+        return FillTextWithPower(result);
+    }
+    return result;
 }
 
 std::string NotificationLocale::GetBatteryConfig(const std::string& config)
@@ -164,9 +171,12 @@ std::string NotificationLocale::FillTextWithPower(const std::string& text)
     std::string powerStr = GetBatteryConfig("max_power");
     std::string batteryLevelStr = GetBatteryConfig("sink_bat_level");
     if (powerStr.size() <= VALID_STRING_LEN + 1 || batteryLevelStr.size() <= VALID_STRING_LEN) {
-        auto iter = stringMap_.find("reverse_super_charge_start_text");
-        if (iter != stringMap_.end()) {
-            return iter->second;
+        {
+            std::shared_lock<std::shared_mutex> lock(dataMutex_);
+            auto iter = stringMap_.find("reverse_super_charge_start_text");
+            if (iter != stringMap_.end()) {
+                return iter->second;
+            }
         }
         return text;
     }
