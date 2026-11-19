@@ -19,6 +19,7 @@
 #include <fstream>
 #include <unordered_map>
 #include <mutex>
+#include <shared_mutex>
 #include <string>
 #include <unistd.h>
 
@@ -47,6 +48,8 @@ private:
     std::unordered_map<std::string, std::string> stringMap_;
     std::string localeBaseName_;
     bool islanguageMapInit_ { false };
+    // Protects languageMap_, stringMap_, localeBaseName_, islanguageMapInit_
+    std::shared_mutex dataMutex_;
     static std::mutex mutex_;
     static std::shared_ptr<NotificationLocale> instance_;
 };
