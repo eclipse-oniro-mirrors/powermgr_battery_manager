@@ -629,7 +629,7 @@ bool BatteryNotify::PublishCustomEvent(const BatteryInfo& info, const std::strin
     int ret = HookMgrExecute(GetBatteryHookMgr(), static_cast<int32_t>(BatteryHookStage::BATTERY_UEVENT_CHECK),
         (void*)&ueventCheckInfo, nullptr);
     if (ret == 0 && !ueventCheckInfo.checkResult) {
-        BATTERY_HILOGW(FEATURE_BATT_INFO, "PublishCustomEvent fail, uevent=%{public}s, checkResult=%{public}d",
+        BATTERY_HILOGD(FEATURE_BATT_INFO, "PublishCustomEvent fail, uevent=%{public}s, checkResult=%{public}d",
             ueventCheckInfo.UeventName.c_str(), ueventCheckInfo.checkResult);
         return false;
     }
